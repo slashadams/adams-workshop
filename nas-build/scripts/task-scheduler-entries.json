@@ -1,0 +1,72 @@
+{
+  "_comment": "ADM Task Scheduler entries for NAS backup infrastructure. These are user-defined scheduled tasks in ADM. Import via Control Panel → Task Scheduler → Add → Scheduled Task → User-defined script. Or recreate manually with the schedule and script paths below.",
+  "tasks": [
+    {
+      "name": "NAS: pull vzdump from Proxmox nodes",
+      "type": "scheduled_script",
+      "schedule": {
+        "type": "daily",
+        "time": "02:30"
+      },
+      "run_as": "root",
+      "script": "/usr/local/bin/nas-backup/pull-vzdump.sh",
+      "enabled": true,
+      "notes": "Runs nightly at 02:30. Proxmox's built-in vzdump schedule runs at 02:00, so 02:30 gives it time to complete. Adjust if your vzdump schedule differs."
+    },
+    {
+      "name": "NAS: restic backup",
+      "type": "scheduled_script",
+      "schedule": {
+        "type": "daily",
+        "time": "03:30"
+      },
+      "run_as": "root",
+      "script": "/usr/local/bin/nas-backup/restic-backup.sh",
+      "enabled": true,
+      "notes": "Runs nightly at 03:30, after pull-vzdump.sh completes. Backs up /volume1/backup-primary/vzdump-staging/ to the restic repo with --keep-daily 7 --keep-weekly 4 --keep-monthly 3 retention."
+    },
+    {
+      "name": "NAS: restic replicate to Volume 2",
+      "type": "scheduled_script",
+      "schedule": {
+        "type": "daily",
+        "time": "05:00"
+      },
+      "run_as": "root",
+      "script": "/usr/local/bin/nas-backup/restic-replicate.sh",
+      "enabled": true,
+      "notes": "Runs nightly at 05:00, after restic-backup.sh. Uses 'restic copy' to deduplicate the snapshot history from Volume 1 to Volume 2."
+    },
+    {
+      "name": "NAS: restic check (weekly integrity)",
+      "type": "scheduled_script",
+      "schedule": {
+        "type": "weekly",
+        "day": "Sunday",
+        "time": "03:00"
+      },
+      "run_as": "root",
+      "script": "/usr/local/bin/nas-backup/restic-check.sh",
+      "enabled": true,
+      "notes": "Runs Sundays at 03:00. Validates the entire restic repo for bitrot and corruption. Catches problems before you need to restore."
+    }
+  ],
+  "proxmox_side": {
+    "comment": "Proxmox-side vzdump schedule. Set this in Proxmox's web UI at Datacenter → Backup → Add. Once set, the Proxmox node runs vzdump locally to /var/lib/vz/dump/. The NAS then pulls those files via pull-vzdump.sh.",
+    "schedule": {
+      "storage": "local",
+      "schedule": "daily",
+      "time": "02:00",
+      "selection_mode": "all",
+      "mode": "snapshot",
+      "compression": "zstd",
+      "notification_mode": "none"
+    },
+    "notes": "Set this on BOTH Proxmox nodes (Acer Nitro 10.0.100.10 and HP Omen 10.0.100.137). Email notification is set to 'none' because the NAS-side matrix-monitor-backups.sh is the source of truth for backup success/failure."
+  },
+  "felix_side": {
+    "comment": "Felix-side cron entry for matrix-monitor-backups.sh. Install on Felix (not the NAS).",
+    "cron_entry": "0 */6 * * * /root/felix/scripts/nas-deploy/matrix-monitor-backups.sh >> /var/log/nas-backup-monitor.log 2>&1",
+    "notes": "Runs every 6 hours. Watches /mnt/nas-backup-primary (NFS-mounted) for backup freshness. Posts to the Matrix alert room if any node's backup is older than 26 hours. Requires /mnt/nas-backup-primary to be mounted — see setup-guide.md Phase 11 for the /etc/fstab entry."
+  }
+}

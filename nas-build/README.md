@@ -8,6 +8,8 @@ A 4-bay NAS used as a Proxmox backup target + network storage extension + phone 
 
 **See [`setup-guide.md`](setup-guide.md) for the full setup walkthrough** — covers ADM setup, Btrfs volume creation, SMB + NFS + Syncthing + restic + Proxmox integration + Matrix alerts.
 
+**For the deployable scripts** (key install, restic backup, NAS bootstrap, Felix-side monitor), see [`scripts/`](scripts/).
+
 ## At a glance
 
 - **Topology:** 2× 2-drive Btrfs RAID1 mirrors (4TB usable each)

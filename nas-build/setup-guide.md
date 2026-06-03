@@ -6,6 +6,8 @@
 
 **Approximate cost:** ~$340-380 (NAS unit only — your 4× 4TB drives are the data tier). Same price at Amazon and B&H Photo, both with free shipping; Amazon typically arrives faster.
 
+**Pre-built scripts:** All the deployable scripts referenced in this doc (key installer, NAS bootstrap, restic backup/replicate/check, pull-vzdump, Felix-side Matrix monitor) live in [`scripts/`](scripts/). The install order is in `scripts/README.md`. Run those scripts rather than typing out the commands in Phases 7-11 by hand.
+
 ---
 
 ## What this gets you
