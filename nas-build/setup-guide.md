@@ -1,16 +1,16 @@
-# NAS Setup — Asustor Drivestor 4 Gen2 (AS1204T)
+# NAS Setup — Asustor Drivestor 4 Pro Gen2 (AS3304T v2)
 
-**Status:** Hardware picked. Doc covers ADM (Asustor Data Master) setup + ZFS-style volume configuration + NFS/SMB/Syncthing/restic + Proxmox integration + Matrix alerts.
+**Status:** Hardware picked. Doc covers ADM (Asustor Data Master) setup + Btrfs volume configuration + NFS/SMB/Syncthing/restic + Proxmox integration + Matrix alerts.
 
-**Hardware:** Asustor AS1204T (4-bay, Realtek RTD1619B quad-core, 1GB DDR4, 2.5GbE) + your 4× 4TB 3.5" drives.
+**Hardware:** Asustor AS3304T v2 (Drivestor 4 Pro Gen2) — 4-bay, Realtek RTD1619B quad-core, 2GB DDR4 (soldered, non-upgradeable), 2.5GbE + your 4× 4TB 3.5" drives.
 
-**Approximate cost:** ~$285 (NAS unit only — your 4× 4TB drives are the data tier).
+**Approximate cost:** ~$340-380 (NAS unit only — your 4× 4TB drives are the data tier). Same price at Amazon and B&H Photo, both with free shipping; Amazon typically arrives faster.
 
 ---
 
 ## What this gets you
 
-- **NAS unit:** Asustor AS1204T, 4-bay, 2.5GbE
+- **NAS unit:** Asustor AS3304T v2, 4-bay, 2.5GbE, 2GB RAM (soldered)
 - **OS:** ADM (Asustor Data Manager) — web UI, app catalog, no command line required for the basics
 - **Filesystem:** Btrfs (ADM default) — supports checksumming, snapshots, and pooling. Different from ZFS but similar reliability story
 - **Topology (what we're building):**
@@ -42,7 +42,7 @@ ADM's Storage Manager creates "Volumes" out of disks. Each volume is a Btrfs fil
 
 ### Phase 1: Unbox and physical install (~15 min)
 
-1. **Inventory:** AS1204T unit, power cord, ethernet cable, quick-start guide, 4× drive caddies.
+1. **Inventory:** AS3304T v2 unit, power cord, ethernet cable, quick-start guide, 4× drive caddies.
 2. **Install the 4× 4TB drives into caddies.** Each caddy has 4 screws (or is toolless, depending on revision). Drive label facing up, SATA connector toward the back of the caddy. Slide each caddy into the front bays until it clicks.
 3. **Connect ethernet** to your LAN (your UniFi switch or directly to the gateway).
 4. **Power on.** The front-panel LED will indicate boot status.
@@ -291,7 +291,7 @@ Then `mount -a` to test.
 
 **After all 11 phases, you have:**
 
-- ✅ Asustor AS1204T with 4× 4TB drives in 2× Btrfs RAID1 mirrors
+- ✅ Asustor AS3304T v2 with 4× 4TB drives in 2× Btrfs RAID1 mirrors
 - ✅ Volume 1: versioned Proxmox backups (restic), replicated to Volume 2
 - ✅ Volume 2: personal files (SMB to Windows), Proxmox node storage (NFS), phone sync (Syncthing)
 - ✅ Cross-pool replication via restic copy
@@ -307,13 +307,13 @@ Then `mount -a` to test.
 **Things that are different from the TrueNAS version:**
 
 - ADM is a web-UI-driven OS, not a Debian box. SSH + Entware gives you command-line access for restic, but you don't manage the OS at the Linux level.
-- Btrfs instead of ZFS. Both are copy-on-write filesystems with checksumming. Btrfs is what Asustor ships; ZFS would require wiping ADM and installing TrueNAS (which the AS1204T can run, but that's a different build).
+- Btrfs instead of ZFS. Both are copy-on-write filesystems with checksumming. Btrfs is what Asustor ships; ZFS would require wiping ADM and installing TrueNAS (which the AS3304T can run, but that's a different build).
 - ADM's app catalog is more curated than TrueNAS Scale's. Syncthing is available, Plex/Jellyfin are available. Less choice, but everything you actually need is there.
-- 1GB RAM is tight. Don't try to run Plex transcoding or VMs on this. The NAS does storage; Proxmox does compute.
+- 2GB RAM is comfortable for the basic setup (ADM + SMB + NFS + Syncthing + restic). Don't try to run Plex transcoding or VMs on this. The NAS does storage; Proxmox does compute.
 
 **Next steps:**
 
-1. Order the Asustor AS1204T (~$285 on Amazon — `B0FTFVRQQ6` is the ASIN)
+1. Order the Asustor AS3304T v2 (~$340-380 on Amazon — same price at B&H Photo, both with free shipping; Amazon typically arrives faster. B&H offers 4-payment financing through B&H Pay Later / Affirm; Amazon also accepts Affirm if you have the Affirm card)
 2. While waiting, finish the SSH access setup to the Proxmox nodes (we were mid-thread on this — the vzdump-pull script needs it)
 3. When the unit arrives, follow phases 1-11 in order
 4. After first successful backup, test a restore (restore an LXC to a temporary VM and verify it boots)
@@ -324,8 +324,8 @@ Then `mount -a` to test.
 
 - **External USB rotation schedule** — when, where the drive lives, who rotates it
 - **Whether ADM's bundled EZ-Sync is preferable to Syncthing for your phone** — EZ-Sync is Asustor's own sync tool, simpler UI. Syncthing is more flexible. Both work; the doc uses Syncthing because it's what you asked about.
-- **Whether to flash TrueNAS Scale onto the AS1204T** — possible, but loses ADM's polish. Not recommended unless you outgrow ADM.
+- **Whether to flash TrueNAS Scale onto the AS3304T** — possible, but loses ADM's polish. Not recommended unless you outgrow ADM.
 - **How to back up the NAS itself** — if both drives in Volume 1 die, the restic repo is gone. ZFS mirror (in TrueNAS) handles this; Btrfs RAID1 in ADM does too, for single-drive failure. For double-drive failure in the same volume, mitigation is the external USB rotation.
-- **1GB RAM observation** — if you find ADM is sluggish or Syncthing has memory issues, you can install a 4GB DDR4 SO-DIMM later (~$25-40). Not required for the basic setup.
+- **2GB RAM is the ceiling.** Asustor's consumer Drivestor line solders RAM to the motherboard — there is no SO-DIMM slot on the AS3304T v2. If 2GB becomes a constraint in 3+ years, the upgrade path is a new NAS, not a RAM swap. For the planned use (storage + Syncthing + light apps), 2GB should be sufficient for the lifetime of the device.
 
 ---
