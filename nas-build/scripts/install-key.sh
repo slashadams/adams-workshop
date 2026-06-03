@@ -57,7 +57,11 @@ if ssh -o StrictHostKeyChecking=accept-new -i "$PRIVKEY_FILE" "$PROXMOX_USER@$PR
 fi
 
 # Read the password (or use sshpass)
-if command -v sshpass >/dev/null 2>&1; then
+if [ -n "${PROXMOX_PASS:-}" ]; then
+  export SSHPASS="$PROXMOX_PASS"
+  SSH_COPY="sshpass -e ssh"
+  SCP_COPY="sshpass -e scp"
+elif command -v sshpass >/dev/null 2>&1; then
   read -s -p "Enter root password for $PROXMOX_HOST: " PROXMOX_PASS
   echo
   export SSHPASS="$PROXMOX_PASS"
@@ -65,7 +69,7 @@ if command -v sshpass >/dev/null 2>&1; then
   SCP_COPY="sshpass -e scp"
 else
   echo "sshpass not installed. Install with: apt install sshpass"
-  echo "Or run this script with the password available via SSH_ASKPASS."
+  echo "Or run this script with PROXMOX_PASS env var set, or password available via SSH_ASKPASS."
   exit 1
 fi
 
