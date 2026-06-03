@@ -2,7 +2,7 @@
 
 **Status:** Parts list confirmed, ready to order. Build doc covers assembly + TrueNAS Scale setup + Proxmox backup integration + Syncthing + Matrix alerts.
 
-**Estimated build cost:** ~$275 new (parts only — your 4× 4TB drives are free)
+**Estimated build cost:** ~$330-535 new (parts only — your 4× 4TB drives are free), depending on where you source the board/case and PSU choice
 
 ---
 
@@ -10,15 +10,19 @@
 
 | # | Part | Specific SKU | Price (approx) | Notes |
 |---|---|---|---|---|
-| 1 | Motherboard | CWWK N100 NAS Monster Board (4× 2.5GbE, 6× SATA 3.0, 2× M.2 NVMe) | $115 | Fan included. N100 is the right chip — 4 cores, 6W TDP, plenty for NAS duty. |
-| 2 | Case | Jonsbo N3 Mini-ITX NAS Chassis (8× 3.5" + 1× 2.5" hot-swap bays) | $95 | Black or silver. Built-in fans + SFX PSU support. |
-| 3 | RAM | Crucial 8GB DDR5-4800 SO-DIMM (CT8G48C40S5) | $25 | 8GB is plenty for TrueNAS + SMB + NFS + Syncthing + restic. |
-| 4 | Boot SSD | Kingston 128GB A400 SATA 2.5" (or any 120-128GB SATA SSD) | $22 | Separate from data pool. OS lives here. |
+| 1 | Motherboard | CWWK N100 NAS Monster Board (4× 2.5GbE, 6× SATA 3.0, 2× M.2 NVMe) | $195-205 | Fan included. N100 is the right chip — 4 cores, 6W TDP, plenty for NAS duty. Prices vary by seller (CWWK direct via Amazon, AliExpress, or AliExpress) — shop around. |
+| 2 | Case | Jonsbo N3 Mini-ITX NAS Chassis (8× 3.5" + 1× 2.5" hot-swap bays) | $130-170 | Black or silver. Built-in fans + SFX PSU support. AliExpress ~$117+shipping, Amazon US ~$165-170, Newegg ~$140-150. |
+| 3 | RAM | Crucial 8GB DDR5-4800 SO-DIMM (CT8G48C40S5) | $20-30 | 8GB is plenty for TrueNAS + SMB + NFS + Syncthing + restic. |
+| 4 | Boot SSD | Kingston 128GB A400 SATA 2.5" (or any 120-128GB SATA SSD) | $15-25 | Separate from data pool. OS lives here. |
 | 5 | PSU | Corsair SF450 or similar 450W SFX (or use a 12V barrel adapter if board supports it) | $50-60 | SFX required for Jonsbo N3. Check board specs — CWWK N100 may take 12V DC directly via 4-pin Molex, in which case a $25 12V 90W adapter works instead. |
 | 6 | CPU cooler | Low-profile 115X-compatible (Cooler Master G200P or similar, 65W TDP) | $20-30 | CWWK includes a basic fan; an aftermarket low-profile is quieter. Optional. |
 | 7 | SATA cables | 4× SATA cables (often included with case/motherboard) | $0-15 | Confirm what's in the box; spares are cheap. |
 
-**Total:** ~$285-310 new, depending on PSU choice.
+**Total:** ~$430-535 new, depending on PSU choice and where you buy the board/case.
+
+**Cheapest realistic build** (CWWK direct via AliExpress for board, AliExpress for case, 12V barrel adapter instead of SFX PSU, no aftermarket cooler): ~$330-380
+**Mid-range build** (Amazon for everything, SFX PSU, no aftermarket cooler): ~$450-500
+**Top end** (Amazon Prime, all add-ons, aftermarket cooler): ~$520-550
 
 ### Where to buy (Amazon links to specific listings)
 
@@ -335,7 +339,7 @@ echo "Latest backup: $AGE_HOURS hours old (OK)"
 
 **Next steps:**
 
-1. Order the parts (~$285)
+1. Order the parts (~$330-535 depending on choices)
 2. While waiting, finish the SSH access setup to the Proxmox nodes (we were mid-thread on this)
 3. When parts arrive, follow phases 1-12 in order
 4. After first successful backup, test a restore (this is the part most people skip, then regret)
